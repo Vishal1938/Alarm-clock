@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alarm Clock</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        #alarm-clock {
+            height: 500px;
+            width: 500px;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            background-color: rgb(8, 86, 154);
+            border-radius: 10%;
+        }
+
+        #container {
+            margin: auto;
+        }
+
+        #clock{
+            text-align: center;
+            font-size: 50px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 50px;
+        }
+
+        .delete-button{
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .display-items{
+            color: white;
+            font-size: 30px;
+            font-weight: bold;
+            margin: 10px;
+        }
+
+        button{
+            background-color: rgb(123, 110, 174);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        #hours, #minutes, #seconds,#ampm{
+            padding: 5px;
+            margin: 2px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        #ampm{
+            padding: 5px;
+            margin: 2px;
+            font-size: 16px;
+            border-radius: 5px;
+            background-color: rgb(123, 110, 174);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="alarm-clock">
+        <div id="container">
+            <div id="clock">00:00:00</div>
+            <input id="hours" type="number" min="1" max="12" placeholder="Hours">
+            <input id="minutes" type="number" min="0" max="59" placeholder="Minutes">
+            <input id="seconds" type="number" min="0" max="59" placeholder="Seconds">
+            <select id="ampm">
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+            </select>
+            <button onclick="setAlarm()">Set Alarm</button>
+            <ul id="alarms"></ul>
+            <script>
+                function updateClock() {
+                    var now = new Date();
+                    var hours = now.getHours();
+                    var minutes = now.getMinutes();
+                    var seconds = now.getSeconds();
+                    var ampm = hours >= 12 ? 'PM' : 'AM';
+                    hours = hours % 12;
+                    hours = hours ? hours : 12;
+                    document.getElementById('clock').textContent =
+                        hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+                    checkAlarms(hours, minutes, seconds, ampm);
+                }
+
+                function setAlarm() {
+                    var hours = document.getElementById('hours').value;
+                    var minutes = document.getElementById('minutes').value;
+                    var seconds = document.getElementById('seconds').value;
+                    var ampm = document.getElementById('ampm').value;
+                    var alarm = {hours: hours, minutes: minutes, seconds: seconds, ampm: ampm};
+                    var alarms = JSON.parse(localStorage.getItem('alarms')) || [];
+                    alarms.push(alarm);
+                    localStorage.setItem('alarms', JSON.stringify(alarms));
+                    displayAlarms();
+                }
+
+                function displayAlarms() {
+                    var alarms = JSON.parse(localStorage.getItem('alarms')) || [];
+                    var alarmsList = document.getElementById('alarms');
+                    alarmsList.innerHTML = '';
+                    alarmsList.className="display-items";
+                    alarms.forEach(function(alarm, index) {
+                        var li = document.createElement('li');
+                        li.textContent = alarm.hours + ':' + alarm.minutes + ':' + alarm.seconds + ' ' + alarm.ampm;
+                        var button = document.createElement('button');
+                        button.textContent = 'Delete';
+                        button.className = 'delete-button';
+                        button.onclick = function() {
+                            deleteAlarm(index);
+                        };
+                        li.appendChild(button);
+                        alarmsList.appendChild(li);
+                    });
+                }
+
+                function deleteAlarm(index) {
+                    var alarms = JSON.parse(localStorage.getItem('alarms')) || [];
+                    alarms.splice(index, 1);
+                    localStorage.setItem('alarms', JSON.stringify(alarms));
+                    displayAlarms();
+                }
+
+                function checkAlarms(hours, minutes, seconds, ampm) {
+                    var alarms = JSON.parse(localStorage.getItem('alarms')) || [];
+                    alarms.forEach(function(alarm, index) {
+                        if (alarm.hours == hours && alarm.minutes == minutes && alarm.seconds == seconds && alarm.ampm == ampm) {
+                            alert('Alarm!');
+                            deleteAlarm(index);
+                        }
+                    });
+                }
+
+                setInterval(updateClock, 1000);
+                displayAlarms();
+            </script>
+        </div>
+    </div>
+</body>
+</html>
